@@ -1,0 +1,659 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>BeeMate – Video Call</title>
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap"
+    rel="stylesheet"
+  >
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      background: #0B0B0B;
+    }
+
+    body {
+      color: #FFFFFF;
+      font-family: 'Plus Jakarta Sans', 'Segoe UI', Arial, sans-serif;
+    }
+
+    button {
+      font: inherit;
+    }
+
+    /* HALAMAN */
+    .pg {
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      width: 100%;
+      max-width: 420px;
+      height: 100vh;
+      height: 100dvh;
+      margin: 0 auto;
+      overflow: hidden;
+      background: radial-gradient(
+        120% 80% at 50% 30%,
+        #2A2210 0%,
+        #0B0B0B 70%
+      );
+    }
+
+    .m {
+      color: #B8B8B8;
+    }
+
+    .row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* HEADER */
+    .vtop {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 20px 0;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 800;
+    }
+
+    .logo {
+      display: block;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    .pill {
+      padding: 6px 12px;
+      border: 1px solid #3A3A3A;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.08);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    /* AREA VIDEO CALL */
+    .stage {
+      position: relative;
+      display: flex;
+      flex: 1;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .avatar-wrap {
+      position: relative;
+      width: 140px;
+      height: 140px;
+    }
+
+    .av {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex: none;
+      border-radius: 50%;
+      background: #FFC933;
+      color: #0B0B0B;
+      font-weight: 800;
+    }
+
+    .contact-avatar {
+      position: relative;
+      z-index: 1;
+      width: 140px;
+      height: 140px;
+      font-size: 50px;
+    }
+
+    /* ANIMASI PANGGILAN */
+    .ring {
+      position: absolute;
+      inset: 0;
+      border: 2px solid #FFC933;
+      border-radius: 50%;
+      opacity: 0;
+      pointer-events: none;
+      animation: pulse 2s infinite;
+    }
+
+    .ring.r2 {
+      animation-delay: 0.8s;
+    }
+
+    @keyframes pulse {
+      0% {
+        transform: scale(1);
+        opacity: 0.7;
+      }
+
+      100% {
+        transform: scale(2.3);
+        opacity: 0;
+      }
+    }
+
+    .stage.conn .ring {
+      display: none;
+      animation: none;
+    }
+
+    .contact-name {
+      margin: 14px 0 0;
+      font-size: 26px;
+      font-weight: 800;
+      line-height: 1.2;
+    }
+
+    .call-status {
+      font-size: 15px;
+      line-height: 1.45;
+    }
+
+    .verified {
+      color: #5FD39A;
+    }
+
+    /* PREVIEW KAMERA PENGGUNA */
+    .self {
+      position: absolute;
+      right: 18px;
+      bottom: 18px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 104px;
+      min-height: 140px;
+      padding: 8px;
+      border: 2px solid #FFFFFF;
+      border-radius: 18px;
+      background: #1D1D1D;
+      font-size: 11px;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .self-avatar {
+      width: 56px;
+      height: 56px;
+      font-size: 20px;
+      transition: opacity 0.2s;
+    }
+
+    /* KONTROL PANGGILAN */
+    .ctl {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      padding: 18px 12px 30px;
+      border-top: 1.5px solid #2B2B2B;
+      background: #101010;
+    }
+
+    .cb {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      width: 64px;
+      color: #B8B8B8;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .cb button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 58px;
+      height: 58px;
+      padding: 0;
+      border: 1.5px solid #8C8C8C;
+      border-radius: 50%;
+      background: #151515;
+      color: #FFFFFF;
+      cursor: pointer;
+      transition: transform 0.2s, background 0.2s;
+    }
+
+    .cb button:hover {
+      transform: scale(1.05);
+    }
+
+    .cb button:focus-visible {
+      outline: 2px solid #FFFFFF;
+      outline-offset: 4px;
+    }
+
+    .cb button[aria-pressed="true"] {
+      border-color: #FFFFFF;
+      background: #FFFFFF;
+      color: #0B0B0B;
+    }
+
+    .cb button.end {
+      border-color: #E5384B;
+      background: #E5384B;
+      color: #FFFFFF;
+    }
+
+    .cb button:disabled {
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
+
+    .sl {
+      display: none;
+    }
+
+    [aria-pressed="true"] .sl {
+      display: block;
+    }
+
+    /* LAYAR KECIL */
+    @media (max-height: 500px) {
+      .vtop {
+        padding-top: 10px;
+      }
+
+      .stage {
+        gap: 5px;
+      }
+
+      .avatar-wrap,
+      .contact-avatar {
+        width: 90px;
+        height: 90px;
+      }
+
+      .contact-avatar {
+        font-size: 34px;
+      }
+
+      .contact-name {
+        margin-top: 4px;
+      }
+
+      .self {
+        right: 10px;
+        bottom: 8px;
+        width: 78px;
+        min-height: 100px;
+      }
+
+      .self-avatar {
+        width: 42px;
+        height: 42px;
+        font-size: 16px;
+      }
+
+      .ctl {
+        gap: 10px;
+        padding: 10px 8px 12px;
+      }
+
+      .cb button {
+        width: 46px;
+        height: 46px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .ring {
+        display: none;
+        animation: none;
+      }
+
+      .cb button,
+      .self-avatar {
+        transition: none;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="pg">
+
+    <header class="vtop">
+      <div class="brand">
+        <img
+          src="logo.png"
+          alt="Logo BeeMate"
+          class="logo"
+        >
+        <span>BeeMate</span>
+      </div>
+
+      <span class="pill">Video call</span>
+    </header>
+
+    <section class="stage" id="stage">
+
+      <div class="avatar-wrap">
+        <span class="ring" aria-hidden="true"></span>
+        <span class="ring r2" aria-hidden="true"></span>
+
+        <div class="av contact-avatar" aria-label="Inisial Nadia A.">
+          SA
+        </div>
+      </div>
+
+      <h1 class="contact-name">Sukma Agung</h1>
+
+      <p
+        class="m call-status"
+        id="st"
+        role="status"
+        aria-live="polite"
+      >
+        Memanggil…
+      </p>
+
+      <span class="pill verified">
+        ✓ Terverifikasi BINUS
+      </span>
+
+      <div class="self" id="self">
+        <div class="av self-avatar" id="sv">
+          AN
+        </div>
+
+        <span id="svl">Anda</span>
+      </div>
+
+    </section>
+
+    <footer class="ctl">
+
+      <div class="cb">
+        <button
+          type="button"
+          id="mic"
+          aria-pressed="false"
+          aria-label="Matikan mikrofon"
+        >
+          <svg
+            width="26"
+            height="26"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <rect x="9" y="3" width="6" height="11" rx="3"/>
+            <path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>
+            <path class="sl" d="M3 3l18 18"/>
+          </svg>
+        </button>
+
+        <span>Mikrofon</span>
+      </div>
+
+      <div class="cb">
+        <button
+          type="button"
+          id="cam"
+          aria-pressed="false"
+          aria-label="Matikan kamera"
+        >
+          <svg
+            width="26"
+            height="26"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <rect x="2" y="6" width="13" height="12" rx="2.5"/>
+            <path d="M15 10.5l6-3.5v10l-6-3.5"/>
+            <path class="sl" d="M3 3l18 18"/>
+          </svg>
+        </button>
+
+        <span>Kamera</span>
+      </div>
+
+      <div class="cb">
+        <button
+          type="button"
+          id="flip"
+          aria-label="Balik kamera"
+        >
+          <svg
+            width="26"
+            height="26"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M4 12a8 8 0 0 1 14-5l2 2M20 4v5h-5"/>
+            <path d="M20 12a8 8 0 0 1-14 5l-2-2M4 20v-5h5"/>
+          </svg>
+        </button>
+
+        <span>Balik</span>
+      </div>
+
+      <div class="cb">
+        <button
+          type="button"
+          id="end"
+          class="end"
+          aria-label="Akhiri panggilan"
+        >
+          <svg
+            width="26"
+            height="26"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M3 14c5-5 13-5 18 0l-2 3.5-3.5-1.2v-2.6c-2-.8-4-.8-6 0v2.6L5 17.5z"/>
+          </svg>
+        </button>
+
+        <span>Akhiri</span>
+      </div>
+
+    </footer>
+  </main>
+
+  <script>
+    (() => {
+      const stage = document.getElementById("stage");
+      const status = document.getElementById("st");
+
+      const mic = document.getElementById("mic");
+      const cam = document.getElementById("cam");
+      const flip = document.getElementById("flip");
+      const end = document.getElementById("end");
+
+      const selfAvatar = document.getElementById("sv");
+      const selfLabel = document.getElementById("svl");
+
+      const params = new URLSearchParams(location.search);
+      const reducedMotion = window.matchMedia(
+        "(prefers-reduced-motion: reduce)"
+      ).matches;
+
+      let seconds = 0;
+      let timer = null;
+      let connectTimeout = null;
+      let flipTimeout = null;
+      let connected = false;
+      let ended = false;
+
+      let cameraFacing = "user";
+
+      function formatTime(totalSeconds) {
+        const minutes = String(
+          Math.floor(totalSeconds / 60)
+        ).padStart(2, "0");
+
+        const secondsPart = String(
+          totalSeconds % 60
+        ).padStart(2, "0");
+
+        return `${minutes}:${secondsPart}`;
+      }
+
+      function connect() {
+        if (connected || ended) return;
+
+        connected = true;
+        stage.classList.add("conn");
+
+        status.textContent = "Terhubung · 00:00";
+
+        timer = setInterval(() => {
+          seconds += 1;
+          status.textContent =
+            `Terhubung · ${formatTime(seconds)}`;
+        }, 1000);
+      }
+
+      function updateControls() {
+        const micOff =
+          mic.getAttribute("aria-pressed") === "true";
+
+        const camOff =
+          cam.getAttribute("aria-pressed") === "true";
+
+        mic.setAttribute(
+          "aria-label",
+          micOff ? "Nyalakan mikrofon" : "Matikan mikrofon"
+        );
+
+        cam.setAttribute(
+          "aria-label",
+          camOff ? "Nyalakan kamera" : "Matikan kamera"
+        );
+
+        selfAvatar.style.opacity = camOff ? "0.25" : "1";
+
+        const labels = [];
+
+        if (camOff) labels.push("Kamera mati");
+        if (micOff) labels.push("Mic mati");
+
+        selfLabel.textContent = labels.length
+          ? labels.join(" · ")
+          : "Anda";
+      }
+
+      function toggleControl(button) {
+        button.addEventListener("click", () => {
+          if (ended) return;
+
+          const isPressed =
+            button.getAttribute("aria-pressed") === "true";
+
+          button.setAttribute(
+            "aria-pressed",
+            String(!isPressed)
+          );
+
+          updateControls();
+        });
+      }
+
+      toggleControl(mic);
+      toggleControl(cam);
+
+      flip.addEventListener("click", () => {
+        if (ended) return;
+
+        cameraFacing =
+          cameraFacing === "user" ? "environment" : "user";
+
+        selfLabel.textContent =
+          cameraFacing === "user"
+            ? "Kamera depan"
+            : "Kamera belakang";
+
+        clearTimeout(flipTimeout);
+
+        flipTimeout = setTimeout(() => {
+          if (!ended) updateControls();
+        }, 900);
+      });
+
+      end.addEventListener("click", () => {
+        if (ended) return;
+
+        ended = true;
+
+        clearInterval(timer);
+        clearTimeout(connectTimeout);
+        clearTimeout(flipTimeout);
+
+        status.textContent =
+          "Panggilan berakhir" +
+          (seconds ? ` · ${formatTime(seconds)}` : "");
+
+        mic.disabled = true;
+        cam.disabled = true;
+        flip.disabled = true;
+        end.disabled = true;
+
+        setTimeout(() => {
+          window.location.href = "8-chat.html";
+        }, reducedMotion ? 200 : 900);
+      });
+
+      if (params.has("connected")) {
+        connect();
+      } else {
+        connectTimeout = setTimeout(
+          connect,
+          reducedMotion ? 500 : 3000
+        );
+      }
+    })();
+  </script>
+</body>
+</html>
